@@ -53,7 +53,25 @@ class ProductControllerTest {
     }
 
     @Test
-    void findProductById() {
+    @DirtiesContext
+    void findProductById() throws Exception {
+        NewProduct product = new NewProduct("TestProduct", 0.99);
+        String productAsJson = objectMapper.writeValueAsString(product);
+
+        MvcResult result = mockMvc
+                .perform(post(BASE_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(productAsJson)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Product savedProduct = objectMapper.readValue(result.getResponse().getContentAsString(), Product.class);
+        String savedProductAsJson = objectMapper.writeValueAsString(savedProduct);
+
+        mockMvc.perform(get(BASE_URI + "/" + savedProduct.id()))
+                .andExpect(status().isOk())
+                .andExpect(content().json(savedProductAsJson));
     }
 
     @Test
