@@ -23,7 +23,7 @@ public class ProductController {
 
     @GetMapping("/price/{price}")
     public List<Product> getAllProductsBynPrice(@PathVariable double price) {
-        return productService.getAllProductsBynPrice(price);
+        return productService.getAllProductsByPrice(price);
     }
 
     @PostMapping

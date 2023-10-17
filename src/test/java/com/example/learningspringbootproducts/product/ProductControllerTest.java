@@ -75,11 +75,47 @@ class ProductControllerTest {
     }
 
     @Test
-    void getAllProductsBynPrice() {
+    @DirtiesContext
+    void getAllProductsByPrice_whenEntriesInDb_expectStatus200AndReturnEntriesAsJson() throws Exception {
+        NewProduct product = new NewProduct("TestProduct", 0.99);
+        String productAsJson = objectMapper.writeValueAsString(product);
+
+        MvcResult result = mockMvc
+                .perform(post(BASE_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(productAsJson)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Product savedProduct = objectMapper.readValue(result.getResponse().getContentAsString(), Product.class);
+
+        List<Product> products = List.of(savedProduct);
+        String productsAsJson = objectMapper.writeValueAsString(products);
+
+        mockMvc.perform(get(BASE_URI))
+                .andExpect(status().isOk())
+                .andExpect(content().json(productsAsJson));
     }
 
     @Test
-    void addProduct() {
+    @DirtiesContext
+    void addProduct() throws Exception{
+        NewProduct product = new NewProduct("addedProduct", 9.99);
+        String productAsJson = objectMapper.writeValueAsString(product);
+
+        MvcResult result = mockMvc.perform(post(BASE_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(productAsJson)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Product savedProduct = objectMapper.readValue(result.getResponse().getContentAsString(), Product.class);
+
+        assertNotNull(savedProduct.id());
+        assertNotNull(savedProduct.name());
+        assertNotNull(savedProduct.price());
     }
 
     @Test
