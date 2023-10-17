@@ -13,8 +13,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -119,7 +118,26 @@ class ProductControllerTest {
     }
 
     @Test
-    void removeProductById() {
+    @DirtiesContext
+    void removeProductById() throws Exception {
+        NewProduct product = new NewProduct("addedProduct", 9.99);
+        String productAsJson = objectMapper.writeValueAsString(product);
+
+        MvcResult result = mockMvc.perform(post(BASE_URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(productAsJson)
+                )
+                .andExpect(status().isOk())
+                .andReturn();
+
+        Product savedProduct = objectMapper.readValue(result.getResponse().getContentAsString(), Product.class);
+
+        mockMvc.perform(delete(BASE_URI + "/" + savedProduct.id()))
+                .andExpect(status().isOk());
+
+        MvcResult getResult = mockMvc.perform(get(BASE_URI + "/" + savedProduct.id()))
+                .andExpect(status().isNotFound())
+                .andReturn();
     }
 
     @Test
