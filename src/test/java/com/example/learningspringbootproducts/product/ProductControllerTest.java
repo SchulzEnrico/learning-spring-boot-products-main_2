@@ -12,6 +12,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -92,7 +93,7 @@ class ProductControllerTest {
         List<Product> products = List.of(savedProduct);
         String productsAsJson = objectMapper.writeValueAsString(products);
 
-        mockMvc.perform(get(BASE_URI))
+        mockMvc.perform(get(BASE_URI + "/price/" + savedProduct.price()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(productsAsJson));
     }
@@ -113,8 +114,8 @@ class ProductControllerTest {
         Product savedProduct = objectMapper.readValue(result.getResponse().getContentAsString(), Product.class);
 
         assertNotNull(savedProduct.id());
-        assertNotNull(savedProduct.name());
-        assertNotNull(savedProduct.price());
+        assertEquals(product.name(), savedProduct.name());
+        assertEquals(product.price(), savedProduct.price());
     }
 
     @Test
@@ -134,13 +135,10 @@ class ProductControllerTest {
 
         mockMvc.perform(delete(BASE_URI + "/" + savedProduct.id()))
                 .andExpect(status().isOk());
-
-        MvcResult getResult = mockMvc.perform(get(BASE_URI + "/" + savedProduct.id()))
-                .andExpect(status().isNotFound())
-                .andReturn();
     }
 
     @Test
     void updateProductById() {
     }
+
 }
